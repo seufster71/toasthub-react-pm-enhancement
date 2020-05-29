@@ -29,8 +29,8 @@ export default function usersReducer(state = {}, action) {
 					items: reducerUtils.getItems(action),
 					listLimit: reducerUtils.getListLimit(action),
 					listStart: reducerUtils.getListStart(action),
-					orderCriteria: [{'orderColumn':'PM_ENHANCEMENT_TABLE_NAME','orderDir':'ASC'}],
-    				searchCriteria: [{'searchValue':'','searchColumn':'PM_ENHANCEMENT_TABLE_NAME'}],
+					orderCriteria: [{'orderColumn':'PM_ENHANCEMENT_TABLE_ID','orderDir':'DESC'}],
+    				searchCriteria: [{'searchValue':'','searchColumn':'PM_ENHANCEMENT_TABLE_SUMMARY'}],
 					selected: null,
 					isModifyOpen: false
 				});

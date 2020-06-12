@@ -15,7 +15,7 @@
  */
 import reducerUtils from '../../core/common/reducer-utils';
 
-export default function usersReducer(state = {}, action) {
+export default function enhancementReducer(state = {}, action) {
 	let myState = {};
 	switch(action.type) {
 		case 'LOAD_INIT_PM_ENHANCEMENT': {
@@ -85,8 +85,13 @@ export default function usersReducer(state = {}, action) {
 										}
 									}
 								}
+								inputFields[prefForms.PM_ENHANCEMENT_FORM[i].name] = result;
+							} else if (prefForms.PM_ENHANCEMENT_FORM[i].fieldType == "DATE") {
+								let d = new Date();
+								inputFields[prefForms.PM_ENHANCEMENT_FORM[i].name] = d.toISOString();
+							} else {
+								inputFields[prefForms.PM_ENHANCEMENT_FORM[i].name] = result;
 							}
-							inputFields[prefForms.PM_ENHANCEMENT_FORM[i].name] = result;
 						}
 					}
 				}
@@ -118,6 +123,22 @@ export default function usersReducer(state = {}, action) {
 		}
 		case 'PM_ENHANCEMENT_ORDERBY': { 
 			return reducerUtils.updateOrderBy(state,action);
+		}
+		case 'PM_ENHANCEMENT_ADD_PARENT': {
+			if (action.parent != null) {
+				return Object.assign({}, state, {
+					parent: action.parent,
+					parentType: action.parentType
+				});
+			} else {
+		        return state;
+		    }
+		}
+		case 'PM_ENHANCEMENT_CLEAR_PARENT': {
+			return Object.assign({}, state, {
+				parent: null,
+				parentType: null
+			});
 		}
 		default:
 			return state;

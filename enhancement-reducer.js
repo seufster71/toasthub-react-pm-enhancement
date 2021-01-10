@@ -31,8 +31,15 @@ export default function enhancementReducer(state = {}, action) {
 					listStart: reducerUtils.getListStart(action),
 					orderCriteria: [{'orderColumn':'PM_ENHANCEMENT_TABLE_ID','orderDir':'DESC'}],
     				searchCriteria: [{'searchValue':'','searchColumn':'PM_ENHANCEMENT_TABLE_SUMMARY'}],
+    				paginationSegment: 1,
 					selected: null,
-					isModifyOpen: false
+					isModifyOpen: false,
+					pageName:"PMPRODUCT",
+					isDeleteModalOpen: false,
+					errors:null, 
+					warns:null, 
+					successes:null,
+					searchValue:""
 				});
 			} else {
 				return state;
@@ -45,8 +52,13 @@ export default function enhancementReducer(state = {}, action) {
 					items: reducerUtils.getItems(action),
 					listLimit: reducerUtils.getListLimit(action),
 					listStart: reducerUtils.getListStart(action),
+					paginationSegment: action.paginationSegment,
 					selected: null,
-					isModifyOpen: false
+					isModifyOpen: false,
+					isDeleteModalOpen: false,
+					errors:null, 
+					warns:null, 
+					successes:null
 				});
 			} else {
 				return state;
@@ -138,6 +150,22 @@ export default function enhancementReducer(state = {}, action) {
 			return Object.assign({}, state, {
 				parent: null,
 				parentType: null
+			});
+		}
+		case 'PM_ENHANCEMENT_SET_ERRORS': {
+			return Object.assign({}, state, {
+				errors: action.errors
+			});
+		}
+		case 'PM_ENHANCEMENT_CLOSE_DELETE_MODAL': {
+			return Object.assign({}, state, {
+				isDeleteModalOpen: false
+			});
+		}
+		case 'PM_ENHANCEMENT_OPEN_DELETE_MODAL': {
+			return Object.assign({}, state, {
+				isDeleteModalOpen: true,
+				selected: action.item
 			});
 		}
 		default:

@@ -22,14 +22,11 @@ import * as enhancementActions from './enhancement-actions';
 import fuLogger from '../../core/common/fu-logger';
 import EnhancementView from '../../memberView/pm_enhancement/enhancement-view';
 import EnhancementModifyView from '../../memberView/pm_enhancement/enhancement-modify-view';
-import utils from '../../core/common/utils';
-import moment from 'moment';
+import BaseContainer from '../../core/container/base-container';
 
-
-class PMEnhancementContainer extends Component {
+class PMEnhancementContainer extends BaseContainer {
 	constructor(props) {
 		super(props);
-		this.state = {pageName:"PM_ENHANCEMENT",isDeleteModalOpen: false, errors:null, warns:null, successes:null};
 	}
 
 	componentDidMount() {
@@ -40,147 +37,21 @@ class PMEnhancementContainer extends Component {
 		}
 	}
 
-	onListLimitChange = (fieldName, event) => {
-		let value = 20;
-		if (this.props.codeType === 'NATIVE') {
-			value = event.nativeEvent.text;
-		} else {
-			value = event.target.value;
-		}
-
-		let listLimit = parseInt(value);
-		this.props.actions.listLimit({state:this.props.pmenhancement,listLimit});
-	}
-
-	onPaginationClick = (value) => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onPaginationClick',msg:"fieldName "+ value});
-		let listStart = this.props.pmenhancement.listStart;
-		let segmentValue = 1;
-		let oldValue = 1;
-		if (this.state["PM_ENHANCEMENT_PAGINATION"] != null && this.state["PM_ENHANCEMENT_PAGINATION"] != ""){
-			oldValue = this.state["PM_ENHANCEMENT_PAGINATION"];
-		}
-		if (value === "prev") {
-			segmentValue = oldValue - 1;
-		} else if (value === "next") {
-			segmentValue = oldValue + 1;
-		} else {
-			segmentValue = value;
-		}
-		listStart = ((segmentValue - 1) * this.props.pmenhancement.listLimit);
-		this.setState({"PM_ENHANCEMENT_PAGINATION":segmentValue});
-		
-		this.props.actions.list({state:this.props.pmenhancement,listStart});
-	}
-
-	onSearchChange = (fieldName, event) => {
-		if (event.type === 'keypress') {
-			if (event.key === 'Enter') {
-				this.onSearchClick(fieldName,event);
-			}
-		} else {
-			if (this.props.codeType === 'NATIVE') {
-				this.setState({[fieldName]:event.nativeEvent.text});
-			} else {
-				this.setState({[fieldName]:event.target.value});
-			}
-		}
-	}
-
-	onSearchClick = (fieldName, event) => {
-		let searchCriteria = [];
-		if (fieldName === 'PM_ENHANCEMENT-SEARCHBY') {
-			if (event != null) {
-				for (let o = 0; o < event.length; o++) {
-					let option = {};
-					option.searchValue = this.state['PM_ENHANCEMENT-SEARCH'];
-					option.searchColumn = event[o].value;
-					searchCriteria.push(option);
-				}
-			}
-		} else {
-			for (let i = 0; i < this.props.pmenhancement.searchCriteria.length; i++) {
-				let option = {};
-				option.searchValue = this.state['PM_ENHANCEMENT-SEARCH'];
-				option.searchColumn = this.props.pmenhancement.searchCriteria[i].searchColumn;
-				searchCriteria.push(option);
-			}
-		}
-
-		this.props.actions.search({state:this.props.pmenhancement,searchCriteria});
-	}
-
-	onOrderBy = (selectedOption, event) => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onOrderBy',msg:"id " + selectedOption});
-		let orderCriteria = [];
-		if (event != null) {
-			for (let o = 0; o < event.length; o++) {
-				let option = {};
-				if (event[o].label.includes("ASC")) {
-					option.orderColumn = event[o].value;
-					option.orderDir = "ASC";
-				} else if (event[o].label.includes("DESC")){
-					option.orderColumn = event[o].value;
-					option.orderDir = "DESC";
-				} else {
-					option.orderColumn = event[o].value;
-				}
-				orderCriteria.push(option);
-			}
-		} else {
-			let option = {orderColumn:"PM_ENHANCEMENT_TABLE_NAME",orderDir:"ASC"};
-			orderCriteria.push(option);
-		}
-		this.props.actions.orderBy({state:this.props.pmenhancement,orderCriteria});
+	getState = () => {
+		return this.props.pmenhancement;
 	}
 	
-	onSave = () => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onSave',msg:"test"});
-		let errors = utils.validateFormFields(this.props.pmenhancement.prefForms.PM_ENHANCEMENT_FORM,this.props.pmenhancement.inputFields);
-		
-		if (errors.isValid){
-			this.props.actions.saveItem({state:this.props.pmenhancement});
-		} else {
-			this.setState({errors:errors.errorMap});
-		}
-	}
-	
-	onModify = (item) => {
-		let id = null;
-		if (item != null && item.id != null) {
-			id = item.id;
-		}
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onModify',msg:"test"+id});
-		this.props.actions.modifyItem({id,appPrefs:this.props.appPrefs});
-	}
-	
-	onDelete = (item) => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onDelete',msg:"test"});
-		this.setState({isDeleteModalOpen:false});
-		if (item != null && item.id != "") {
-			this.props.actions.deleteItem({state:this.props.pmenhancement,id:item.id});
-		}
-	}
-	
-	openDeleteModal = (item) => {
-		this.setState({isDeleteModalOpen:true,selected:item});
-	}
+	getForm = () => {
+		return "PM_ENHANCEMENT_FORM";
+	}	
 	
 	onOption = (code, item) => {
 		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onOption',msg:" code "+code});
+		if (this.onOptionBase(code,item)) {
+			return;
+		}
+		
 		switch(code) {
-			case 'MODIFY': {
-				this.onModify(item);
-				break;
-			}
-			case 'DELETE': {
-				this.openDeleteModal(item);
-				break;
-			}
-			case 'DELETEFINAL': {
-				this.onDelete(item);
-				break;
-			}
 			case 'COMMENT': {
 				this.props.history.push({pathname:'/pm-comment',state:{parent:item,parentType:"ENHANCEMENT"}});
 				break;
@@ -188,83 +59,21 @@ class PMEnhancementContainer extends Component {
 		}
 	}
 	
-	closeModal = () => {
-		this.setState({isDeleteModalOpen:false,errors:null,warns:null});
-	}
-	
-	onCancel = () => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onCancel',msg:"test"});
-		this.props.actions.list({state:this.props.pmenhancement});
-	}
-	
-	inputChange = (type,field,value,event) => {
-		utils.inputChange({type,props:this.props,field,value,event});
-	}
-	
-	onBlur = (field) => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::onBlur',msg:field.name});
-		let fieldName = field.name;
-		// get field and check what to do
-		if (field.optionalParams != ""){
-			let optionalParams = JSON.parse(field.optionalParams);
-			if (optionalParams.onBlur != null) {
-				if (optionalParams.onBlur.validation != null && optionalParams.onBlur.validation == "matchField") {
-					if (field.validation != "") {
-						let validation = JSON.parse(field.validation);
-						if (validation[optionalParams.onBlur.validation] != null && validation[optionalParams.onBlur.validation].id != null){
-							if (this.props.pmenhancement.inputFields[validation[optionalParams.onBlur.validation].id] == this.props.pmenhancement.inputFields[fieldName]) {
-								if (validation[optionalParams.onBlur.validation].successMsg != null) {
-									let successMap = this.state.successes;
-									if (successMap == null){
-										successMap = {};
-									}
-									successMap[fieldName] = validation[optionalParams.onBlur.validation].successMsg;
-									this.setState({successes:successMap, errors:null});
-								}
-							} else {
-								if (validation[optionalParams.onBlur.validation].failMsg != null) {
-									let errorMap = this.state.errors;
-									if (errorMap == null){
-										errorMap = {};
-									}
-									errorMap[fieldName] = validation[optionalParams.onBlur.validation].failMsg;
-									this.setState({errors:errorMap, successes:null});
-								}
-							}
-						}
-					}
-				} else if (optionalParams.onBlur.func != null) {
-				
-				}
-			}
-		}
-	}
-	
-	goBack = () => {
-		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::goBack',msg:"test"});
-		this.props.history.goBack();
-	}
-	
 	render() {
 		fuLogger.log({level:'TRACE',loc:'EnhancementContainer::render',msg:"Hi there"});
 		if (this.props.pmenhancement.isModifyOpen) {
 			return (
 				<EnhancementModifyView
-				containerState={this.state}
-				item={this.props.pmenhancement.selected}
-				inputFields={this.props.pmenhancement.inputFields}
+				itemState={this.props.pmenhancement}
 				appPrefs={this.props.appPrefs}
-				itemPrefForms={this.props.pmenhancement.prefForms}
 				onSave={this.onSave}
 				onCancel={this.onCancel}
-				onReturn={this.onCancel}
 				inputChange={this.inputChange}
-				onBlur={this.onBlur}/>
+				/>
 			);
 		} else if (this.props.pmenhancement.items != null) {
 			return (
 				<EnhancementView
-				containerState={this.state}
 				itemState={this.props.pmenhancement}
 				appPrefs={this.props.appPrefs}
 				onListLimitChange={this.onListLimitChange}
